@@ -8,12 +8,12 @@ import '../interfaces/erc20_interface.sol';
 import '../libraries/safe_math.sol';
  
 // Your token contract
-// TODO: Replace "Token" with your token name!
-contract Token is IERC20 {
+// : Replace "Token" with your token name!
+contract Smile is IERC20 {
     using SafeMath for uint;
 
-    string public constant symbol = '';                 // TODO: Give your token a symbol
-    string public constant name = '';                   // TODO: Give your token a name
+    string public constant symbol = ':)';                 // : Give your token a symbol
+    string public constant name = 'Smile';                   // : Give your token a name
     uint8 public constant decimals = 18;                // See note about decimals in section 2
 
     mapping(address => uint) balances;
@@ -22,15 +22,23 @@ contract Token is IERC20 {
     uint public _totalSupply;
     
     address public admin;
+    
+    bool public mintAllowed;
 
     constructor() {
         _totalSupply = 0;
         balances[msg.sender] = 0;  
-        admin = msg.sender;                
+        admin = msg.sender;        
+        mintAllowed = true;
     }
 
     modifier AdminOnly {
         require(msg.sender == admin);
+        _;
+    }
+    
+    modifier MintAllowed {
+        require(mintAllowed);
         _;
     }
 
@@ -45,8 +53,11 @@ contract Token is IERC20 {
     function _mint(uint amount) 
         public 
         AdminOnly
+        MintAllowed
     {
-        /******* TODO: Implement this function *******/
+        /******* : Implement this function *******/
+        _totalSupply = _totalSupply.add(amount);
+        balances[admin] = balances[admin].add(amount);
     }
 
     // Function _disable_mint: Disable future minting of your token.
@@ -56,7 +67,8 @@ contract Token is IERC20 {
         public
         AdminOnly
     {
-        /******* TODO: Implement this function *******/
+        /******* : Implement this function *******/
+        mintAllowed = false;
     }
 
 
