@@ -19,6 +19,8 @@ contract TokenExchange {
     // Liquidity pool for the exchange
     uint public token_reserves = 0;
     uint public eth_reserves = 0;
+    mapping(address => uint) public stakes;
+    uint public total_stakes = 0;
 
     // Constant: x * y = k
     uint public k;
@@ -69,8 +71,10 @@ contract TokenExchange {
         token_reserves = amountTokens;
         k = eth_reserves.mul(token_reserves);
 
-        // TODO: Keep track of the initial liquidity added so the initial provider
+        // : Keep track of the initial liquidity added so the initial provider
         //          can remove this liquidity
+        stakes[msg.sender] = msg.value;
+        total_stakes = msg.value;
     }
 
     // ============================================================
@@ -85,10 +89,11 @@ contract TokenExchange {
         view
         returns (uint)
     {
-        /******* TODO: Implement this function *******/
+        /******* : Implement this function *******/
         /* HINTS:
             Calculate how much ETH is of equivalent worth based on the current exchange rate.
         */
+        return eth_reserves.div(token_reserves);
     }
 
     // Function priceETH: Calculate the price of ETH for your token.
@@ -98,10 +103,11 @@ contract TokenExchange {
         view
         returns (uint)
     {
-        /******* TODO: Implement this function *******/
+        /******* : Implement this function *******/
         /* HINTS:
             Calculate how much of your token is of equivalent worth based on the current exchange rate.
         */
+        return token_reserves.div(eth_reserves);
     }
 
 
@@ -113,13 +119,26 @@ contract TokenExchange {
         external 
         payable
     {
-        /******* TODO: Implement this function *******/
+        /******* : Implement this function *******/
         /* HINTS:
             Calculate the liquidity to be added based on what was sent in and the prices.
             If the caller possesses insufficient tokens to equal the ETH sent, then transaction must fail.
             Update token_reserves, eth_reserves, and k.
             Emit AddLiquidity event.
         */
+        // transfer tokens to this exchange
+        uint equivalentToken = priceETH().mul(msg.value);
+        require(token.allowance(msg.sender, address(this)) >= equivalentToken, "Insuffecient token.");
+        token.transferFrom(msg.sender, address(this), equivalentToken);
+        // update reserves and k 
+        eth_reserves = eth_reserves.add(msg.value);
+        token_reserves = token_reserves.add(equivalentToken);
+        k = eth_reserves.mul(token_reserves);
+        // increase the sender's stakes
+        stakes[msg.sender] = stakes[msg.sender].add(msg.value);
+        total_stakes = total_stakes.add(msg.value);
+        // emit the event
+        emit AddLiquidity(msg.sender, msg.value);
     }
 
 
@@ -136,6 +155,21 @@ contract TokenExchange {
             Update token_reserves, eth_reserves, and k.
             Emit RemoveLiquidity event.
         */
+        // verify that the sender is entitled to enough funds
+        uint neededStakes = amountETH.mul(total_stakes.div(eth_reserves));
+        require(neededStakes <= stakes[msg.sender], "User is not entitled to enough ETH");
+        // update the state of this exchange to reflect the withdrawal
+        stakes[msg.sender] = stakes[msg.sender].sub(neededStakes);
+        total_stakes = total_stakes.sub(neededStakes);
+        uint equivalentToken = priceETH().mul(amountETH);
+        eth_reserves = eth_reserves.sub(amountETH);
+        token_reserves = token_reserves.sub(equivalentToken);
+        k = eth_reserves.mul(token_reserves);
+        // transfer funds
+        payable(msg.sender).transfer(amountETH);
+        token.transfer(msg.sender, equivalentToken);
+        // emit the event
+        emit RemoveLiquidity(msg.sender, amountETH);
     }
 
     // Function removeAllLiquidity: Removes all liquidity that msg.sender is entitled to withdraw
