@@ -32,6 +32,7 @@ contract TokenExchange {
     event AddLiquidity(address from, uint amount);
     event RemoveLiquidity(address to, uint amount);
     event Received(address from, uint amountETH);
+    event RemoveAllLiquidity(address to, uint amount);
 
     constructor() 
     {
@@ -183,6 +184,9 @@ contract TokenExchange {
             Decide on the maximum allowable ETH that msg.sender can remove.
             Call removeLiquidity().
         */
+        uint all_liquidity = stakes[msg.sender];
+        removeLiquidity(all_liquidity);
+        emit RemoveAllLiquidity(msg.sender, all_liquidity);
     }
 
     /***  Define helper functions for liquidity management here as needed: ***/
@@ -214,6 +218,13 @@ contract TokenExchange {
                     where % is sent to liquidity providers.
                 Keep track of the liquidity fees to be added.
         */
+
+        // Amount of ETH
+        uint priceETH = priceETH();
+        uint priceToken = priceToken();
+        uint amountETH = (amountTokens * priceToken) / priceETH;
+
+        // Transfer ETH
 
 
         /***************************/
