@@ -574,29 +574,29 @@ function log(description, obj) {
 /*** ADD LIQUIDITY ***/
 async function addLiquidity(amountEth, maxSlippagePct) {
     /** TODO: ADD YOUR CODE HERE **/
-
+	return exchange_contract.methods.addLiquidity(amountEth).call({from:web3.eth.defaultAccount});
 }
 
 /*** REMOVE LIQUIDITY ***/
 async function removeLiquidity(amountEth, maxSlippagePct) {
     /** TODO: ADD YOUR CODE HERE **/
-
+	return exchange_contract.methods.removeLiquidity(amountEth).call({from:web3.eth.defaultAccount});
 }
 
 async function removeAllLiquidity(maxSlippagePct) {
     /** TODO: ADD YOUR CODE HERE **/
-
+	return exchange_contract.methods.removeAllLiquidity().call({from:web3.eth.defaultAccount});
 }
 
 /*** SWAP ***/
 async function swapTokensForETH(amountToken, maxSlippagePct) {
     /** TODO: ADD YOUR CODE HERE **/
-
+	return exchange_contract.methods.swapTokensForETH(amountToken).call({from:web3.eth.defaultAccount});
 }
 
 async function swapETHForTokens(amountETH, maxSlippagePct) {
     /** TODO: ADD YOUR CODE HERE **/
-
+	return exchange_contract.methods.swapETHForTokens(amountETH).call({from:web3.eth.defaultAccount});
 }
 
 // =============================================================================
@@ -771,4 +771,4 @@ async function sanityCheck() {
 }
 
 // Uncomment this to run when directly opening index.html
-// sanityCheck();		
+sanityCheck();		
