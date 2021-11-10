@@ -127,6 +127,7 @@ contract TokenExchange {
             Emit AddLiquidity event.
         */
         // transfer tokens to this exchange
+        require(msg.value > 0, "Provided amount of ETH must be positive");
         uint equivalentToken = priceETH().mul(msg.value);
         require(token.allowance(msg.sender, address(this)) >= equivalentToken, "Insuffecient token.");
         token.transferFrom(msg.sender, address(this), equivalentToken);
@@ -135,8 +136,9 @@ contract TokenExchange {
         token_reserves = token_reserves.add(equivalentToken);
         k = eth_reserves.mul(token_reserves);
         // increase the sender's stakes
-        stakes[msg.sender] = stakes[msg.sender].add(msg.value);
-        total_stakes = total_stakes.add(msg.value);
+        uint equivalentStakes = msg.value.mul(total_stakes.div(eth_reserves));
+        stakes[msg.sender] = stakes[msg.sender].add(equivalentStakes);
+        total_stakes = total_stakes.add(equivalentStakes);
         // emit the event
         emit AddLiquidity(msg.sender, msg.value);
     }
