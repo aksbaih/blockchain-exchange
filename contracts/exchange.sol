@@ -156,6 +156,7 @@ contract TokenExchange {
             Emit RemoveLiquidity event.
         */
         // verify that the sender is entitled to enough funds
+        require(amountETH > 0, "Requested amount of ETH must be positive");
         uint neededStakes = amountETH.mul(total_stakes.div(eth_reserves));
         require(neededStakes <= stakes[msg.sender], "User is not entitled to enough ETH");
         // update the state of this exchange to reflect the withdrawal
@@ -178,11 +179,13 @@ contract TokenExchange {
         external
         payable
     {
-        /******* TODO: Implement this function *******/
+        /******* : Implement this function *******/
         /* HINTS:
             Decide on the maximum allowable ETH that msg.sender can remove.
             Call removeLiquidity().
         */
+        uint entitledETH = stakes[msg.sender].div(total_stakes).mul(eth_reserves);
+        removeLiquidity(entitledETH);
     }
 
     /***  Define helper functions for liquidity management here as needed: ***/
