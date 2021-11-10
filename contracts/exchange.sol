@@ -218,6 +218,7 @@ contract TokenExchange {
                 Keep track of the liquidity fees to be added.
         */
         // calculate the amount of ETH
+        require(amountTokens > 0, "Provided amonut of tokens must be positive");
         require(token.allowance(msg.sender, address(this)) >= amountTokens, "Insuffecient tokens");
         uint equivalentETH = priceToken().mul(amountTokens);
         require(equivalentETH < eth_reserves, "Insuffecient ETH in reserves");
@@ -250,7 +251,7 @@ contract TokenExchange {
         external
         payable 
     {
-        /******* TODO: Implement this function *******/
+        /******* : Implement this function *******/
         /* HINTS:
             Calculate amount of your tokens should be swapped based on exchange rate.
             Transfer the amount of your tokens to the provider.
@@ -266,8 +267,14 @@ contract TokenExchange {
                     where % is sent to liquidity providers.
                 Keep track of the liquidity fees to be added.
         */
-
-
+        // calculate the amount of token
+        require(msg.value > 0, "Provided amount of ETH must be positive");
+        uint equivalentToken = priceETH().mul(msg.value);
+        require(equivalentToken < token_reserves, "Insuffecient token in reserves");
+        // transfer funds and update state of contract
+        eth_reserves = eth_reserves.add(msg.value);
+        token_reserves = token_reserves.sub(equivalentToken);
+        token.transfer(msg.sender, equivalentToken);
         /**************************/
         // DO NOT MODIFY BELOW THIS LINE
         /* Check for x * y == k, assuming x and y are rounded to the nearest integer. */
