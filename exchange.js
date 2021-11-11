@@ -15,7 +15,7 @@ const token_symbol = ':)';               // : replace with symbol for your token
 //         ABIs and Contract Addresses: Paste Your ABIs/Addresses Here
 // =============================================================================
 // : Paste your token contract address and ABI here:
-const token_address = '0xD23CaA5A3DC00fB50E6084b40A5329dE07942AA0';
+const token_address = '0xDD3500E217d6374eFd6e0c2e2f2A47C4dd14A65D';
 const token_abi = [
 	{
 		"inputs": [],
@@ -307,7 +307,7 @@ const token_abi = [
 const token_contract = new web3.eth.Contract(token_abi, token_address);
 
 // TODO: Paste your exchange address and ABI here
-const exchange_address = '0x6D2bD7157f520636072f005f901B476286E44219';
+const exchange_address = '0x9a3Cc83d6FF91CD6d3c655B91c621A924705cA98';
 const exchange_abi = [
 	{
 		"inputs": [],
@@ -481,6 +481,25 @@ const exchange_abi = [
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "stakes",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "swapETHForTokens",
 		"outputs": [],
@@ -503,6 +522,19 @@ const exchange_abi = [
 	{
 		"inputs": [],
 		"name": "token_reserves",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "total_stakes",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -574,29 +606,31 @@ function log(description, obj) {
 /*** ADD LIQUIDITY ***/
 async function addLiquidity(amountEth, maxSlippagePct) {
     /** TODO: ADD YOUR CODE HERE **/
-	return exchange_contract.methods.addLiquidity(amountEth).call({from:web3.eth.defaultAccount});
+    await token_contract.methods.approve(exchange_address, 1000).send({from: web3.eth.defaultAccount});
+	return exchange_contract.methods.addLiquidity().send({value: amountETH, from:web3.eth.defaultAccount});
 }
 
 /*** REMOVE LIQUIDITY ***/
 async function removeLiquidity(amountEth, maxSlippagePct) {
     /** TODO: ADD YOUR CODE HERE **/
-	return exchange_contract.methods.removeLiquidity(amountEth).call({from:web3.eth.defaultAccount});
+	return exchange_contract.methods.removeLiquidity(amountEth).send({from:web3.eth.defaultAccount});
 }
 
 async function removeAllLiquidity(maxSlippagePct) {
     /** TODO: ADD YOUR CODE HERE **/
-	return exchange_contract.methods.removeAllLiquidity().call({from:web3.eth.defaultAccount});
+	return exchange_contract.methods.removeAllLiquidity().send({from:web3.eth.defaultAccount});
 }
 
 /*** SWAP ***/
 async function swapTokensForETH(amountToken, maxSlippagePct) {
     /** TODO: ADD YOUR CODE HERE **/
-	return exchange_contract.methods.swapTokensForETH(amountToken).call({from:web3.eth.defaultAccount});
+    await token_contract.methods.approve(exchange_address, amountToken).send({from: web3.eth.defaultAccount});
+	return exchange_contract.methods.swapTokensForETH(amountToken).send({from:web3.eth.defaultAccount});
 }
 
 async function swapETHForTokens(amountETH, maxSlippagePct) {
     /** TODO: ADD YOUR CODE HERE **/
-	return exchange_contract.methods.swapETHForTokens(amountETH).call({from:web3.eth.defaultAccount});
+	return exchange_contract.methods.swapETHForTokens().send({gas: 3000000, value: amountETH, from:web3.eth.defaultAccount});
 }
 
 // =============================================================================
