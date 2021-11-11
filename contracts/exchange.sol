@@ -85,7 +85,7 @@ contract TokenExchange {
     
     // Function priceToken: Calculate the price of your token in ETH.
     // You can change the inputs, or the scope of your function, as needed.
-    function priceToken() 
+    function priceToken(uint amountTokens, bool neg) 
         public 
         view
         returns (uint)
@@ -94,12 +94,14 @@ contract TokenExchange {
         /* HINTS:
             Calculate how much ETH is of equivalent worth based on the current exchange rate.
         */
-        return eth_reserves.mul(PERCISION_MULTIPLIER).div(token_reserves);
+        if (neg) return eth_reserves.mul(PERCISION_MULTIPLIER).div(token_reserves - amountTokens);
+        return eth_reserves.mul(PERCISION_MULTIPLIER).div(token_reserves + amountTokens);
+
     }
 
     // Function priceETH: Calculate the price of ETH for your token.
     // You can change the inputs, or the scope of your function, as needed.
-    function priceETH()
+    function priceETH(uint amountETH, bool neg)
         public
         view
         returns (uint)
@@ -108,7 +110,8 @@ contract TokenExchange {
         /* HINTS:
             Calculate how much of your token is of equivalent worth based on the current exchange rate.
         */
-        return token_reserves.mul(PERCISION_MULTIPLIER).div(eth_reserves);
+        if (neg) return token_reserves.mul(PERCISION_MULTIPLIER).div(eth_reserves - amountETH);
+        return token_reserves.mul(PERCISION_MULTIPLIER).div(eth_reserves + amountETH);
     }
 
 
@@ -116,7 +119,7 @@ contract TokenExchange {
 
     // Function addLiquidity: Adds liquidity given a supply of ETH (sent to the contract as msg.value)
     // You can change the inputs, or the scope of your function, as needed.
-    function addLiquidity() 
+    function addLiquidity(uint max_exchange_rate, uint min_exchange_rate) 
         external 
         payable
     {
@@ -127,9 +130,14 @@ contract TokenExchange {
             Update token_reserves, eth_reserves, and k.
             Emit AddLiquidity event.
         */
+
+        //handle max and min exchange rates
+        require(max_exchange_rate.div(100) > (priceToken(msg.value, false).div(priceToken(0, false))) - 1, "Exceeded maximum exchange rate.");
+        require(min_exchange_rate.div(100) < (priceToken(msg.value, true).div(priceToken(0, false))) - 1, "Exceeded minimum exchange rate.");
+
         // transfer tokens to this exchange
         require(msg.value > 0, "Provided amount of ETH must be positive");
-        uint equivalentToken = priceETH().mul(msg.value).div(PERCISION_MULTIPLIER);
+        uint equivalentToken = priceETH(msg.value, false).mul(msg.value).div(PERCISION_MULTIPLIER);
         require(token.allowance(msg.sender, address(this)) >= equivalentToken, "Insuffecient token.");
         token.transferFrom(msg.sender, address(this), equivalentToken);
         // update reserves and k 
@@ -147,7 +155,7 @@ contract TokenExchange {
 
     // Function removeLiquidity: Removes liquidity given the desired amount of ETH to remove.
     // You can change the inputs, or the scope of your function, as needed.
-    function removeLiquidity(uint amountETH)
+    function removeLiquidity(uint amountETH, uint max_exchange_rate, uint min_exchange_rate) 
         public 
         payable
     {
@@ -158,6 +166,11 @@ contract TokenExchange {
             Update token_reserves, eth_reserves, and k.
             Emit RemoveLiquidity event.
         */
+
+        //handle max and min exchange rates
+        require(max_exchange_rate.div(100) > (priceETH(amountETH, false).div(priceToken(0, false))) - 1, "Exceeded maximum exchange rate.");
+        require(min_exchange_rate.div(100) < (priceETH(amountETH, true).div(priceToken(0, false))) - 1, "Exceeded minimum exchange rate.");
+
         // verify that the sender is entitled to enough funds
         require(amountETH > 0, "Requested amount of ETH must be positive");
         uint neededStakes = amountETH.mul(total_stakes).div(eth_reserves);
@@ -165,7 +178,7 @@ contract TokenExchange {
         // update the state of this exchange to reflect the withdrawal
         stakes[msg.sender] = stakes[msg.sender].sub(neededStakes);
         total_stakes = total_stakes.sub(neededStakes);
-        uint equivalentToken = priceETH().mul(amountETH).div(PERCISION_MULTIPLIER);
+        uint equivalentToken = priceETH(msg.value, false).mul(amountETH).div(PERCISION_MULTIPLIER);
         eth_reserves = eth_reserves.sub(amountETH);
         token_reserves = token_reserves.sub(equivalentToken);
         k = eth_reserves.mul(token_reserves);
@@ -188,7 +201,8 @@ contract TokenExchange {
             Call removeLiquidity().
         */
         uint entitledETH = stakes[msg.sender].mul(eth_reserves).div(total_stakes);
-        removeLiquidity(entitledETH);
+        // removeLiquidity(entitledETH);
+        removeLiquidity(entitledETH, 100, 100);
     }
 
     /***  Define helper functions for liquidity management here as needed: ***/
@@ -199,7 +213,7 @@ contract TokenExchange {
 
     // Function swapTokensForETH: Swaps your token with ETH
     // You can change the inputs, or the scope of your function, as needed.
-    function swapTokensForETH(uint amountTokens)
+    function swapTokensForETH(uint amountTokens, uint max_exchange_rate)
         external 
         payable
     {
@@ -223,8 +237,12 @@ contract TokenExchange {
         // calculate the amount of ETH
         require(amountTokens > 0, "Provided amonut of tokens must be positive");
         require(token.allowance(msg.sender, address(this)) >= amountTokens, "Insuffecient tokens");
-        uint equivalentETH = priceToken().mul(amountTokens).div(PERCISION_MULTIPLIER);
+        uint equivalentETH = priceToken(amountTokens, false).mul(amountTokens).div(PERCISION_MULTIPLIER);
         require(equivalentETH < eth_reserves, "Insuffecient ETH in reserves");
+
+        // handle maximum slippage
+        require(max_exchange_rate.div(100) > (priceToken(amountTokens, false) / priceToken(0, false)) - 1, "Exceeded maximum exchange rate.");
+
         // transfer funds and update state of contract
         token.transferFrom(msg.sender, address(this), amountTokens);
         eth_reserves = eth_reserves.sub(equivalentETH);
@@ -250,7 +268,7 @@ contract TokenExchange {
     // Function swapETHForTokens: Swaps ETH for your tokens.
     // ETH is sent to contract as msg.value.
     // You can change the inputs, or the scope of your function, as needed.
-    function swapETHForTokens()
+    function swapETHForTokens(uint max_exchange_rate)
         external
         payable 
     {
@@ -272,8 +290,12 @@ contract TokenExchange {
         */
         // calculate the amount of token
         require(msg.value > 0, "Provided amount of ETH must be positive");
-        uint equivalentToken = priceETH().mul(msg.value).div(PERCISION_MULTIPLIER);
+        uint equivalentToken = priceETH(msg.value, false).mul(msg.value).div(PERCISION_MULTIPLIER);
         require(equivalentToken < token_reserves, "Insuffecient token in reserves");
+
+        // handle maximum slippage
+        require(max_exchange_rate.div(100) > (priceETH(msg.value, false) / priceETH(0, false)) - 1, "Exceeded maximum exchange rate.");
+
         // transfer funds and update state of contract
         eth_reserves = eth_reserves.add(msg.value);
         token_reserves = token_reserves.sub(equivalentToken);
