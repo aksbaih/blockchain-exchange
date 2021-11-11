@@ -13,7 +13,7 @@ contract TokenExchange {
     using SafeMath for uint;
     address public admin;
 
-    address tokenAddr = 0x769447e8E82b2B17EA475caDb0dD1A027bEc42d8;  // : Paste token contract address here.
+    address tokenAddr = 0x53cB60122fea6F3B1F281C142d843C140c3885D8;  // : Paste token contract address here.
     Smile private token = Smile(tokenAddr);         // : Replace "Token" with your token class.             
 
     // Liquidity pool for the exchange
@@ -96,6 +96,14 @@ contract TokenExchange {
         */
         return eth_reserves.mul(PERCISION_MULTIPLIER).div(token_reserves);
     }
+    // price of buying Tokens with slippage for an amount of Tokens
+    function priceToken(uint amountTokens)
+        public
+        view
+        returns (uint)
+    {
+        return eth_reserves.mul(PERCISION_MULTIPLIER).div(token_reserves + amountTokens);
+    }
 
     // Function priceETH: Calculate the price of ETH for your token.
     // You can change the inputs, or the scope of your function, as needed.
@@ -109,6 +117,14 @@ contract TokenExchange {
             Calculate how much of your token is of equivalent worth based on the current exchange rate.
         */
         return token_reserves.mul(PERCISION_MULTIPLIER).div(eth_reserves);
+    }
+    // price of buying ETH with slippage for an amount of ETH
+    function priceETH(uint amountETH)
+        public
+        view
+        returns (uint)
+    {
+        return token_reserves.mul(PERCISION_MULTIPLIER).div(eth_reserves + amountETH);
     }
 
 
@@ -223,7 +239,7 @@ contract TokenExchange {
         // calculate the amount of ETH
         require(amountTokens > 0, "Provided amonut of tokens must be positive");
         require(token.allowance(msg.sender, address(this)) >= amountTokens, "Insuffecient tokens");
-        uint equivalentETH = priceToken().mul(amountTokens).div(PERCISION_MULTIPLIER);
+        uint equivalentETH = priceToken(amountTokens).mul(amountTokens).div(PERCISION_MULTIPLIER);
         require(equivalentETH < eth_reserves, "Insuffecient ETH in reserves");
         // transfer funds and update state of contract
         token.transferFrom(msg.sender, address(this), amountTokens);
@@ -272,7 +288,7 @@ contract TokenExchange {
         */
         // calculate the amount of token
         require(msg.value > 0, "Provided amount of ETH must be positive");
-        uint equivalentToken = priceETH().mul(msg.value).div(PERCISION_MULTIPLIER);
+        uint equivalentToken = priceETH(msg.value).mul(msg.value).div(PERCISION_MULTIPLIER);
         require(equivalentToken < token_reserves, "Insuffecient token in reserves");
         // transfer funds and update state of contract
         eth_reserves = eth_reserves.add(msg.value);

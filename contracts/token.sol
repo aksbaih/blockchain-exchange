@@ -38,7 +38,7 @@ contract Smile is IERC20 {
     }
     
     modifier MintAllowed {
-        require(mintAllowed);
+        require(mintAllowed, "Mint had been disabled");
         _;
     }
 
