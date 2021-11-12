@@ -6,34 +6,18 @@
 1. Explain why adding and removing liquidity to your exchange does not change the exchange rate.
 
 
-# TODO: answer question 1 here
-
-
-2. Explain your scheme for rewarding liquidity providers and justify the design decisions you made. How does it satisfy requirements (2)-(4) from Section 5?
-
-
-# TODO: answer question 2 here
+# : answer question 1 here
+Because the provider is required to add a propotional amount of both currencies equivelant to the current exchange
+rate. For example, if the pool has 1/2 and we add 2/4 to both pools, the result is 3/6 which equals 1/2 in ratio,
+keeping the exchange rate constant.
 
 
 3. Describe at least one method you used to minimize your exchange contract's gas usage. Why was this method effective?
 
 
-# TODO: answer question 3 here
-
-
-4. Optional Feedback:
-4a. How much time did you spend on the assignment?
-
-# TODO: answer question 4(a) here
-
-4b. What is one thing that would have been useful to know before starting the assignment?
-
-# TODO: answer question 4(b) here
-
-4c. If you could change one with about this assignment, what would you change?
-
-# TODO: answer question 4(c) here
-
-4d. Please feel free to include any other feedback you may have below.
-
-# TODO: answer question 4(d) here
+The ordering of the "require" statements is organized to terminate the function if it fails simpler checks first
+before checking the heavier-weight conditions. This saves some gas by avoiding the heavy-weight checks if the simpler
+ones fail.
+Example:
+require(msg.value > 0, "Provided amount of ETH must be positive");
+require(priceETH() >= min_exchange_rate, "Exchange rate is below the minimum");
