@@ -15,7 +15,7 @@ const token_symbol = ':)';               // : replace with symbol for your token
 //         ABIs and Contract Addresses: Paste Your ABIs/Addresses Here
 // =============================================================================
 // : Paste your token contract address and ABI here:
-const token_address = '0x53cB60122fea6F3B1F281C142d843C140c3885D8';
+const token_address = '0xE9695Ab6A58e6F3ccdf675E43dB211b955310D82';
 const token_abi = [
 	{
 		"inputs": [],
@@ -307,8 +307,13 @@ const token_abi = [
 const token_contract = new web3.eth.Contract(token_abi, token_address);
 
 // TODO: Paste your exchange address and ABI here
-const exchange_address = '0x77FC8784BFf9712cBB162C8f2b2D680d96fd18A7';
+const exchange_address = '0x1aE03D9BBeFEe7D5621F605a6568ababdD55752A';
 const exchange_abi = [
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
 	{
 		"anonymous": false,
 		"inputs": [
@@ -367,10 +372,51 @@ const exchange_abi = [
 		"type": "event"
 	},
 	{
+		"stateMutability": "payable",
+		"type": "fallback"
+	},
+	{
 		"inputs": [],
+		"name": "PERCISION_MULTIPLIER",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "min_exchange_rate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "max_exchange_rate",
+				"type": "uint256"
+			}
+		],
 		"name": "addLiquidity",
 		"outputs": [],
 		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "admin",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -384,72 +430,6 @@ const exchange_abi = [
 		"name": "createPool",
 		"outputs": [],
 		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "removeAllLiquidity",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "amountETH",
-				"type": "uint256"
-			}
-		],
-		"name": "removeLiquidity",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "swapETHForTokens",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "amountTokens",
-				"type": "uint256"
-			}
-		],
-		"name": "swapTokensForETH",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"stateMutability": "payable",
-		"type": "receive"
-	},
-	{
-		"stateMutability": "payable",
-		"type": "fallback"
-	},
-	{
-		"inputs": [],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"inputs": [],
-		"name": "admin",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -479,19 +459,6 @@ const exchange_abi = [
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "PERCISION_MULTIPLIER",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
 		"inputs": [
 			{
 				"internalType": "uint256",
@@ -558,6 +525,47 @@ const exchange_abi = [
 	{
 		"inputs": [
 			{
+				"internalType": "uint256",
+				"name": "min_exchange_rate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "max_exchange_rate",
+				"type": "uint256"
+			}
+		],
+		"name": "removeAllLiquidity",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amountETH",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "min_exchange_rate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "max_exchange_rate",
+				"type": "uint256"
+			}
+		],
+		"name": "removeLiquidity",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "address",
 				"name": "",
 				"type": "address"
@@ -572,6 +580,37 @@ const exchange_abi = [
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "max_exchange_rate",
+				"type": "uint256"
+			}
+		],
+		"name": "swapETHForTokens",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amountTokens",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "max_exchange_rate",
+				"type": "uint256"
+			}
+		],
+		"name": "swapTokensForETH",
+		"outputs": [],
+		"stateMutability": "payable",
 		"type": "function"
 	},
 	{
@@ -599,10 +638,14 @@ const exchange_abi = [
 		],
 		"stateMutability": "view",
 		"type": "function"
+	},
+	{
+		"stateMutability": "payable",
+		"type": "receive"
 	}
 ];
 const exchange_contract = new web3.eth.Contract(exchange_abi, exchange_address);
-
+const EXCHANGE_PERCISION_MULTIPLIER = 1000000000; // from the exchange contract
 
 
 // =============================================================================
@@ -612,10 +655,10 @@ const exchange_contract = new web3.eth.Contract(exchange_abi, exchange_address);
 
 /*** INIT ***/
 async function init() {
-    return;
     var poolState = await getPoolState();
     if (poolState['token_liquidity'] === 0
             && poolState['eth_liquidity'] === 0) {
+        console.log("Initializing Pool");
         // Call mint twice to make sure mint can be called mutliple times prior to disable_mint
         const total_supply = 10000000000;
 		await token_contract.methods._mint(total_supply / 2).send({from:web3.eth.defaultAccount, gas : 999999});
@@ -624,9 +667,9 @@ async function init() {
         await token_contract.methods.approve(exchange_address, total_supply).send({from:web3.eth.defaultAccount});
         // initialize pool with equal amounts of ETH and tokens, so exchange rate begins as 1:1
         await exchange_contract.methods.createPool(total_supply).send({from:web3.eth.defaultAccount, value : total_supply, gas : 999999});
-
         // All accounts start with 0 of your tokens. Thus, be sure to swap before adding liquidity.
     }
+    console.log("Pool initialized");
 }
 
 async function getPoolState() {
@@ -657,32 +700,61 @@ function log(description, obj) {
 
 /*** ADD LIQUIDITY ***/
 async function addLiquidity(amountEth, maxSlippagePct) {
-    /** TODO: ADD YOUR CODE HERE **/
-    await token_contract.methods.approve(exchange_address, 1000).send({from: web3.eth.defaultAccount});
-	return exchange_contract.methods.addLiquidity().send({value: amountETH, from:web3.eth.defaultAccount});
+    /** : ADD YOUR CODE HERE **/
+    var poolState = await getPoolState();
+    var min_rate = poolState.token_eth_rate - (poolState.token_eth_rate * maxSlippagePct / 100);
+    var max_rate = poolState.token_eth_rate + (poolState.token_eth_rate * maxSlippagePct / 100);
+    var amountToken = max_rate * amountEth;
+    await token_contract.methods.approve(exchange_address, parseInt(amountToken)).send({from: web3.eth.defaultAccount});
+	return exchange_contract.methods.addLiquidity(
+	                            parseInt(min_rate * EXCHANGE_PERCISION_MULTIPLIER),
+                                parseInt(max_rate * EXCHANGE_PERCISION_MULTIPLIER))
+                                    .send({value: amountEth, from: web3.eth.defaultAccount, gas: 999999});
 }
 
 /*** REMOVE LIQUIDITY ***/
 async function removeLiquidity(amountEth, maxSlippagePct) {
-    /** TODO: ADD YOUR CODE HERE **/
-	return exchange_contract.methods.removeLiquidity(amountEth).send({from:web3.eth.defaultAccount});
+    /** : ADD YOUR CODE HERE **/
+    var poolState = await getPoolState();
+    var min_rate = poolState.token_eth_rate - (poolState.token_eth_rate * maxSlippagePct / 100);
+    var max_rate = poolState.token_eth_rate + (poolState.token_eth_rate * maxSlippagePct / 100);
+	return exchange_contract.methods.removeLiquidity(
+	                                parseInt(amountEth),
+	                                parseInt(min_rate * EXCHANGE_PERCISION_MULTIPLIER),
+	                                parseInt(max_rate * EXCHANGE_PERCISION_MULTIPLIER))
+	                                    .send({from: web3.eth.defaultAccount, gas: 999999});
 }
 
 async function removeAllLiquidity(maxSlippagePct) {
-    /** TODO: ADD YOUR CODE HERE **/
-	return exchange_contract.methods.removeAllLiquidity().send({from:web3.eth.defaultAccount});
+    /** : ADD YOUR CODE HERE **/
+    var poolState = await getPoolState();
+    var min_rate = poolState.token_eth_rate - (poolState.token_eth_rate * maxSlippagePct / 100);
+    var max_rate = poolState.token_eth_rate + (poolState.token_eth_rate * maxSlippagePct / 100);
+	return exchange_contract.methods.removeAllLiquidity(
+	                                parseInt(min_rate * EXCHANGE_PERCISION_MULTIPLIER),
+	                                parseInt(max_rate * EXCHANGE_PERCISION_MULTIPLIER))
+	                                    .send({from: web3.eth.defaultAccount, gas: 999999});
 }
 
 /*** SWAP ***/
 async function swapTokensForETH(amountToken, maxSlippagePct) {
-    /** TODO: ADD YOUR CODE HERE **/
-    await token_contract.methods.approve(exchange_address, amountToken).send({from: web3.eth.defaultAccount});
-	return exchange_contract.methods.swapTokensForETH(amountToken).send({from:web3.eth.defaultAccount});
+    /** : ADD YOUR CODE HERE **/
+    var poolState = await getPoolState();
+    var max_rate = poolState.eth_token_rate + (poolState.eth_token_rate * maxSlippagePct / 100);
+    await token_contract.methods.approve(exchange_address, parseInt(amountToken)).send({from: web3.eth.defaultAccount});
+	return exchange_contract.methods.swapTokensForETH(
+	                                    parseInt(amountToken),
+	                                    parseInt(max_rate * EXCHANGE_PERCISION_MULTIPLIER))
+                                            .send({from: web3.eth.defaultAccount, gas: 999999});
 }
 
 async function swapETHForTokens(amountETH, maxSlippagePct) {
-    /** TODO: ADD YOUR CODE HERE **/
-	return exchange_contract.methods.swapETHForTokens().send({gas: 3000000, value: amountETH, from:web3.eth.defaultAccount});
+    /** : ADD YOUR CODE HERE **/
+    var poolState = await getPoolState();
+    var max_rate = poolState.token_eth_rate + (poolState.token_eth_rate * maxSlippagePct / 100);
+	return exchange_contract.methods.swapETHForTokens(
+                                parseInt(max_rate * EXCHANGE_PERCISION_MULTIPLIER))
+                                    .send({gas: 3000000, value: amountETH, from:web3.eth.defaultAccount, gas: 999999});
 }
 
 // =============================================================================
@@ -857,4 +929,4 @@ async function sanityCheck() {
 }
 
 // Uncomment this to run when directly opening index.html
-//sanityCheck();
+sanityCheck();
